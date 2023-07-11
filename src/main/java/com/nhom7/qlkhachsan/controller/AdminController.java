@@ -25,8 +25,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
-@Controller
-@RequestMapping("/admin")
+@RestController
+@RequestMapping(path = "/admin", produces = "application/json")
 public class AdminController {
     @Autowired
     private HotelRepository hotelRepository;
@@ -38,7 +38,6 @@ public class AdminController {
 
     @Autowired
     private RoomService roomService;
-
     @Autowired
     private BookingRoomService bookingRoomService;
     

@@ -1,6 +1,7 @@
 package com.nhom7.qlkhachsan.controller;
 
 import com.nhom7.qlkhachsan.dto.BookingDTO;
+import com.nhom7.qlkhachsan.dto.HotelDTO;
 import com.nhom7.qlkhachsan.dto.RoleDTO;
 import com.nhom7.qlkhachsan.dto.SearchingDTO;
 import com.nhom7.qlkhachsan.entity.hotel.BookingRoom;
@@ -23,8 +24,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@Controller
-@RequestMapping("/hotel")
+@RestController
+@RequestMapping(path = "/hotel", produces = "application/json")
 public class HotelController {
     @Autowired
     private HotelService hotelService;
@@ -50,21 +51,8 @@ public class HotelController {
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('ROLE_USER')")
     public String getUIHotel(@PathVariable Long id, Model model){
-        Hotel hotel = hotelService.getHotelByID(id);
-        model.addAttribute("hotel", hotel);
+        HotelDTO hotel = hotelService.getHotelByID(id);
         model.addAttribute("rooms", hotelService.getSomeRoomInType(hotel.getId()));
-        model.addAttribute("newComment", new Comment());
-        Comment lastestComment = hotelService.getLastestComment(id);
-        model.addAttribute("lastestComment", lastestComment);
-        if(lastestComment==null)
-            model.addAttribute("lastestComment", "no");
-
-        Follow fl = hotelService.getFollowByUserAndHotel(getCurrentUser().getId(), id);
-
-        if(fl != null)
-            model.addAttribute("status", "unfollow");
-        else
-            model.addAttribute("status", "follow");
         model.addAttribute("loginedUser", getCurrentUser());
         if(getCurrentUser()!=null){
             List<RoleDTO> roles = roleRepository.getRolesByUserId(getCurrentUser().getId());
@@ -75,23 +63,23 @@ public class HotelController {
         return "hotel";
     }
 
-    @GetMapping("/{id}/booking")
-    public String getUIbookingRoom(@PathVariable Long id, Model model){
-        Hotel hotel = hotelService.getHotelByID(id);
-        List<Room> rooms = roomService.getEmptyRooms(id);
-        model.addAttribute("hotel", hotel);
-        model.addAttribute("rooms", rooms);
-        model.addAttribute("booking", new BookingDTO());
-
-        List<String> roomName = new ArrayList<String>();
-        for(Room r: rooms)
-        {
-            roomName.add(r.getRoomName());
-        }
-        model.addAttribute("roomName", roomName);
-
-        return "reservation";
-    }
+//    @GetMapping("/{id}/booking")
+//    public String getUIbookingRoom(@PathVariable Long id, Model model){
+//        Hotel hotel = hotelService.getHotelByID(id);
+//        List<Room> rooms = roomService.getEmptyRooms(id);
+//        model.addAttribute("hotel", hotel);
+//        model.addAttribute("rooms", rooms);
+//        model.addAttribute("booking", new BookingDTO());
+//
+//        List<String> roomName = new ArrayList<String>();
+//        for(Room r: rooms)
+//        {
+//            roomName.add(r.getRoomName());
+//        }
+//        model.addAttribute("roomName", roomName);
+//
+//        return "reservation";
+//    }
 
     @PostMapping("/{id}/booking")
     public String bookingRoom(@PathVariable Long id, BookingDTO bookingDTO, Model model){
@@ -114,61 +102,61 @@ public class HotelController {
         return "redirect:/";
     }
 
-    @GetMapping("/follow/{id}")
-    public String followHotel(@PathVariable Long id, Model model){
-        hotelService.followHotel(getCurrentUser(), id);
-        Hotel hotel = hotelService.getHotelByID(id);
-        model.addAttribute("hotel", hotel);
-        model.addAttribute("newComment", new Comment());
-        Comment lastestComment = hotelService.getLastestComment(id);
-        model.addAttribute("lastestComment", lastestComment);
-        if(lastestComment==null)
-            model.addAttribute("lastestComment", "no");
-
-//        model.addAttribute("rooms", hotelService.getAllByHotelID(hotel.getId()));
-//        Follow fl = hotelService.getFollowByUserAndHotel(getCurrentUser().getId(), id);
-        String status = "unfollow";
-
-        model.addAttribute("status", status);
-        return "hotel";
-    }
-
-    @GetMapping("/unfollow/{id}")
-    public String unfollowHotel(@PathVariable Long id, Model model){
-        hotelService.unfollowHotel(getCurrentUser(), id);
-        Hotel hotel = hotelService.getHotelByID(id);
-        model.addAttribute("hotel", hotel);
-        model.addAttribute("newComment", new Comment());
-        Comment lastestComment = hotelService.getLastestComment(id);
-        model.addAttribute("lastestComment", lastestComment);
-        if(lastestComment==null)
-            model.addAttribute("lastestComment", "no");
-
-//        model.addAttribute("rooms", hotelService.getAllByHotelID(hotel.getId()));
-//        Follow fl = hotelService.getFollowByUserAndHotel(getCurrentUser().getId(), id);
-
-        String status = "follow";
-
-        model.addAttribute("status", status);
-        return "hotel";
-    }
-
-    @PostMapping("/comment")
-    public String commentHotel(Comment comment, Model model){
-        System.out.println("Comment" + comment);
-        Hotel hotel = (Hotel)model.getAttribute("hotel");
-        comment.setUserComment(getCurrentUser());
-        comment.setHotelIsCommented(hotel);
-        commentRepository.save(comment);
-        model.addAttribute("hotel", hotel);
-        model.addAttribute("newComment", new Comment());
-        Comment lastestComment = hotelService.getLastestComment(hotel.getId());
-        model.addAttribute("lastestComment", lastestComment);
-        if(lastestComment==null)
-            model.addAttribute("lastestComment", "no");
-        System.out.println("Comment successfully");
-        return "hotel";
-    }
+//    @GetMapping("/follow/{id}")
+//    public String followHotel(@PathVariable Long id, Model model){
+//        hotelService.followHotel(getCurrentUser(), id);
+//        Hotel hotel = hotelService.getHotelByID(id);
+//        model.addAttribute("hotel", hotel);
+//        model.addAttribute("newComment", new Comment());
+//        Comment lastestComment = hotelService.getLastestComment(id);
+//        model.addAttribute("lastestComment", lastestComment);
+//        if(lastestComment==null)
+//            model.addAttribute("lastestComment", "no");
+//
+////        model.addAttribute("rooms", hotelService.getAllByHotelID(hotel.getId()));
+////        Follow fl = hotelService.getFollowByUserAndHotel(getCurrentUser().getId(), id);
+//        String status = "unfollow";
+//
+//        model.addAttribute("status", status);
+//        return "hotel";
+//    }
+//
+//    @GetMapping("/unfollow/{id}")
+//    public String unfollowHotel(@PathVariable Long id, Model model){
+//        hotelService.unfollowHotel(getCurrentUser(), id);
+//        Hotel hotel = hotelService.getHotelByID(id);
+//        model.addAttribute("hotel", hotel);
+//        model.addAttribute("newComment", new Comment());
+//        Comment lastestComment = hotelService.getLastestComment(id);
+//        model.addAttribute("lastestComment", lastestComment);
+//        if(lastestComment==null)
+//            model.addAttribute("lastestComment", "no");
+//
+////        model.addAttribute("rooms", hotelService.getAllByHotelID(hotel.getId()));
+////        Follow fl = hotelService.getFollowByUserAndHotel(getCurrentUser().getId(), id);
+//
+//        String status = "follow";
+//
+//        model.addAttribute("status", status);
+//        return "hotel";
+//    }
+//
+//    @PostMapping("/comment")
+//    public String commentHotel(Comment comment, Model model){
+//        System.out.println("Comment" + comment);
+//        Hotel hotel = (Hotel)model.getAttribute("hotel");
+//        comment.setUserComment(getCurrentUser());
+//        comment.setHotelIsCommented(hotel);
+//        commentRepository.save(comment);
+//        model.addAttribute("hotel", hotel);
+//        model.addAttribute("newComment", new Comment());
+//        Comment lastestComment = hotelService.getLastestComment(hotel.getId());
+//        model.addAttribute("lastestComment", lastestComment);
+//        if(lastestComment==null)
+//            model.addAttribute("lastestComment", "no");
+//        System.out.println("Comment successfully");
+//        return "hotel";
+//    }
 
     @GetMapping("/search")
     public String searchHotel(@RequestParam String key, Model model){

@@ -1,28 +1,46 @@
 package com.nhom7.qlkhachsan.controller;
 
+import com.nhom7.qlkhachsan.dto.LoginDTO;
+import com.nhom7.qlkhachsan.dto.ValidateMailCodeForm;
+import com.nhom7.qlkhachsan.entity.mailcode.MailCode;
 import com.nhom7.qlkhachsan.entity.user.Role;
 import com.nhom7.qlkhachsan.entity.user.User;
-import com.nhom7.qlkhachsan.repository.HotelRepository;
+import com.nhom7.qlkhachsan.gmail.GmailForm;
+import com.nhom7.qlkhachsan.gmail.Gmailer;
 import com.nhom7.qlkhachsan.repository.RoleRepository;
+import com.nhom7.qlkhachsan.repository.UserRepository;
 import com.nhom7.qlkhachsan.security.CustomUserDetaisService;
+//import com.nhom7.qlkhachsan.utils.JwtTokenUtil;
+import com.nhom7.qlkhachsan.service.MailCodeService;
+import com.nhom7.qlkhachsan.service.MailService;
+import com.nhom7.qlkhachsan.utils.JwtTokenUtil;
 import com.nhom7.qlkhachsan.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.awt.*;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Set;
+import java.util.Random;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
-@Controller
-@RequestMapping("/")
+@RestController
+@RequestMapping(path = "/", produces = "application/json")
 public class AuthController {
+
+    private JwtTokenUtil jwtTokenUtil;
+    public HashMap<String, Integer> authenCode = new HashMap<>();
+    public HashMap<String, Integer> forgotPasswordCode = new HashMap<>();
     @Autowired
     private RoleRepository roleRepository;
 
@@ -30,17 +48,115 @@ public class AuthController {
     private CustomUserDetaisService customUserDetaisService;
 
     @Autowired
+    private MailService mailService;
+
+    @Autowired
     private UserService userService;
 
-    @PostMapping(value = "/signup")
-    public String registerUser(User user){
-        user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
-        Role role = roleRepository.findByRoleName("ROLE_USER");
-        HashSet roles = new HashSet();
-        roles.add(role);
-        user.setRoles(roles);
-        userService.createUser(user);
-        return "login";
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private MailCodeService mailCodeService;
+
+    @Value("${countdown.timer.duration}")
+    private long countdownDuration;
+
+    @PostMapping(value = "/check")
+    @ResponseBody
+    public String validateCode(@RequestBody ValidateMailCodeForm validateMailCodeForm){
+        Date date = new Date();
+        User user = userService.findByFullName(validateMailCodeForm.getMail());
+        System.out.println("==============>user: " + user.getUsername());
+
+        MailCode mailCode = mailCodeService.findByMail(validateMailCodeForm.getMail());
+
+        // Chuyển đổi Date thành LocalDateTime
+        LocalDateTime localDateTime1 = LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
+        LocalDateTime localDateTime2 = LocalDateTime.ofInstant(mailCode.getCreatedAt().toInstant(), ZoneId.systemDefault());
+
+        // Tính chênh lệch thời gian bằng Duration
+        Duration duration = Duration.between(localDateTime1, localDateTime2);
+
+        long seconds = duration.getSeconds(); // Tổng số giây
+        System.out.println("==============>seconds: " + seconds);
+        long absoluteValue = Math.abs(seconds);
+        String res = "";
+        if(absoluteValue < 120 && validateMailCodeForm.getCode()==mailCode.getCode()){
+            res = "thanh cong";
+        }
+        else if (absoluteValue < 120 && validateMailCodeForm.getCode()!=mailCode.getCode()) {
+            res = "nhap sai code -> that bai";
+        }
+        else{
+            userRepository.delete(user);
+            res = "het han code -> that bai";
+        }
+        return res;
+    }
+
+    private void startCountdownTimer(String recipientEmail, int code) {
+        ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+
+        executorService.schedule(() -> {
+            // Countdown timer logic
+            // ...
+
+            System.out.println("Countdown timer finished for " + recipientEmail + ", code: " + code);
+        }, countdownDuration, TimeUnit.MILLISECONDS);
+    }
+
+    @PostMapping(value = "/register")
+    @ResponseBody
+    public String registerUser(@RequestBody LoginDTO loginDTO){
+        try {
+            String res = "email da ton tai";
+            User user = userService.findByFullName(loginDTO.getFullName());
+            System.out.println("======97=====>check mail " + user.getFullName());
+            if (user!=null){
+                System.out.println("======99=====>email da ton tai " + user.getFullName());
+                return res;
+            }
+        }catch (Exception e){
+            // todo
+        }
+        try{
+            Random generator = new Random();
+            User user = new User();
+
+            user.setUsername(loginDTO.getUsername());
+            user.setPassword(new BCryptPasswordEncoder().encode(loginDTO.getPassword()));
+            user.setFullName(loginDTO.getFullName());
+            user.setAge(loginDTO.getAge());
+            user.setPhoneNumber(loginDTO.getPhoneNumber());
+            user.setIdentityCardNumber(loginDTO.getIdentityCardNumber());
+
+            Role role = roleRepository.findByRoleName("ROLE_USER");
+            String res = "thanh cong";
+            HashSet roles = new HashSet();
+            roles.add(role);
+            user.setRoles(roles);
+            userService.createUser(user);
+
+            int code = generator.nextInt((9999 - 1000) + 1) + 1000;
+            authenCode.put(user.getFullName(), code);
+
+//            new Gmailer().sendMail(user.getFullName(), "Xác thực email", GmailForm.mailForm(user.getUsername(), code));
+            mailService.sendMail(user.getUsername(), user.getFullName(), code);
+
+            MailCode mailCode = new MailCode();
+            mailCode.setMail(loginDTO.getFullName());
+            mailCode.setCode(code);
+            mailCode.setCreatedAt(new Date());
+            mailCodeService.createMailCode(mailCode);
+
+//            startCountdownTimer(loginDTO.getFullName(), code);
+            System.out.println("code: "+ authenCode.get(user.getFullName()).toString());
+            return res;
+        }catch (Exception e){
+            String res = "that bai";
+            return res;
+        }
     }
 
     @GetMapping("/signup")
@@ -59,23 +175,23 @@ public class AuthController {
         return "login";
     }
 
-    @GetMapping("/subcribe")
-    public String userSubcribe(){
-        User user = getCurrentUser();
-        if (user.getRoles().size() == 1)
-            return "subcribe";
-        else return "redirect:/admin";
-    }
-
-    @PostMapping("/subcribe")
-    public String subcribe(){
-        User user = getCurrentUser();
-        Set<Role> roles = user.getRoles();
-        roles.add(roleRepository.findByRoleName("ROLE_MANAGER"));
-        user.setRoles(roles);
-        userService.createUser(user);
-        return "subcribeSuccess";
-    }
+//    @GetMapping("/subcribe")
+//    public String userSubcribe(){
+//        User user = getCurrentUser();
+//        if (user.getRoles().size() == 1)
+//            return "subcribe";
+//        else return "redirect:/admin";
+//    }
+//
+//    @PostMapping("/subcribe")
+//    public String subcribe(){
+//        User user = getCurrentUser();
+//        Set<Role> roles = user.getRoles();
+//        roles.add(roleRepository.findByRoleName("ROLE_MANAGER"));
+//        user.setRoles(roles);
+//        userService.createUser(user);
+//        return "subcribeSuccess";
+//    }
 
     private User getCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();

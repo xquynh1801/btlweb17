@@ -7,22 +7,25 @@ import com.nhom7.qlkhachsan.entity.hotel.BookingRoom;
 import com.nhom7.qlkhachsan.entity.hotel.Hotel;
 import com.nhom7.qlkhachsan.entity.user.User;
 import com.nhom7.qlkhachsan.repository.BookingRepository;
+import com.nhom7.qlkhachsan.repository.HotelRepository;
 import com.nhom7.qlkhachsan.repository.RoleRepository;
 import com.nhom7.qlkhachsan.repository.UserRepository;
 import com.nhom7.qlkhachsan.service.BookingRoomService;
 import com.nhom7.qlkhachsan.service.HotelService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Controller
+@RestController
 @RequestMapping("/")
 public class HomeController {
     @Autowired
@@ -38,17 +41,8 @@ public class HomeController {
     private UserRepository userRepository;
 
     @GetMapping
-    public String home(Model model) {
-        model.addAttribute("loginedUser", getCurrentUser());
-        if(getCurrentUser()!=null){
-            List<RoleDTO> roles = roleRepository.getRolesByUserId(getCurrentUser().getId());
-            for(RoleDTO r:roles){
-                model.addAttribute(r.getName(), r.getName());
-            }
-        }
-        List<Hotel> hotels = hotelService.getAll();
-        model.addAttribute("hotels",hotels);
-        return "index";
+    public ResponseEntity<?> getAllHotels() {
+        return ResponseEntity.ok(hotelService.getAll());
     }
 
     @GetMapping("/my_reservation")

@@ -39,12 +39,12 @@ public class ReservationController {
     @Autowired
     private RoleRepository roleRepository;
 
-    @GetMapping()
-    public String loadPageReservation(Model model) {
-        List<Hotel> hotels = hotelService.getAll();
-        model.addAttribute("hotels", hotels);
-        return "showHotels";
-    }
+//    @GetMapping()
+//    public String loadPageReservation(Model model) {
+//        List<Hotel> hotels = hotelService.getAll();
+//        model.addAttribute("hotels", hotels);
+//        return "showHotels";
+//    }
 
 
 //    @GetMapping("/hotel={name}")
