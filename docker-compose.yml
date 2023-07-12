@@ -1,0 +1,40 @@
+version: '3.8'
+services:
+  qlkscache:
+    image: redis:6.2-alpine
+    restart: always
+    ports:
+      - '6379:6379'
+    command: redis-server --save 20 1 --loglevel warning --requirepass eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
+    volumes:
+      - cache:/data
+  qlkses:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.11.0
+    environment:
+      - xpack.security.enabled=false
+      - "discovery.type=single-node"
+    networks:
+      - qlks-net
+    ports:
+      - 9200:9200
+  mysqldb:
+    image: "mysql:latest"
+    restart: always
+    volumes:
+      - ./data:/var/lib/mysql
+      - ./mysql:/docker-entrypoint-initdb.d
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456a@
+      MYSQL_DATABASE: qlkhachsan
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: admin-password
+    ports:
+      - '3306:3306'
+    networks:
+      - qlks-net
+volumes:
+  cache:
+    driver: local
+networks:
+  qlks-net:
+    driver: bridge
