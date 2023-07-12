@@ -1,4 +1,4 @@
-package com.nhom7.qlkhachsan.dto;
+package com.nhom7.qlkhachsan.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

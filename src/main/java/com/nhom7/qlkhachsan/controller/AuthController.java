@@ -1,12 +1,10 @@
 package com.nhom7.qlkhachsan.controller;
 
-import com.nhom7.qlkhachsan.dto.LoginDTO;
+import com.nhom7.qlkhachsan.dto.request.RegisterRequest;
 import com.nhom7.qlkhachsan.dto.ValidateMailCodeForm;
 import com.nhom7.qlkhachsan.entity.mailcode.MailCode;
 import com.nhom7.qlkhachsan.entity.user.Role;
 import com.nhom7.qlkhachsan.entity.user.User;
-import com.nhom7.qlkhachsan.gmail.GmailForm;
-import com.nhom7.qlkhachsan.gmail.Gmailer;
 import com.nhom7.qlkhachsan.repository.RoleRepository;
 import com.nhom7.qlkhachsan.repository.UserRepository;
 import com.nhom7.qlkhachsan.security.CustomUserDetaisService;
@@ -108,10 +106,10 @@ public class AuthController {
 
     @PostMapping(value = "/register")
     @ResponseBody
-    public String registerUser(@RequestBody LoginDTO loginDTO){
+    public String registerUser(@RequestBody RegisterRequest registerRequest){
         try {
             String res = "email da ton tai";
-            User user = userService.findByFullName(loginDTO.getFullName());
+            User user = userService.findByFullName(registerRequest.getFullName());
             System.out.println("======97=====>check mail " + user.getFullName());
             if (user!=null){
                 System.out.println("======99=====>email da ton tai " + user.getFullName());
@@ -124,12 +122,12 @@ public class AuthController {
             Random generator = new Random();
             User user = new User();
 
-            user.setUsername(loginDTO.getUsername());
-            user.setPassword(new BCryptPasswordEncoder().encode(loginDTO.getPassword()));
-            user.setFullName(loginDTO.getFullName());
-            user.setAge(loginDTO.getAge());
-            user.setPhoneNumber(loginDTO.getPhoneNumber());
-            user.setIdentityCardNumber(loginDTO.getIdentityCardNumber());
+            user.setUsername(registerRequest.getUsername());
+            user.setPassword(new BCryptPasswordEncoder().encode(registerRequest.getPassword()));
+            user.setFullName(registerRequest.getFullName());
+            user.setAge(registerRequest.getAge());
+            user.setPhoneNumber(registerRequest.getPhoneNumber());
+            user.setIdentityCardNumber(registerRequest.getIdentityCardNumber());
 
             Role role = roleRepository.findByRoleName("ROLE_USER");
             String res = "thanh cong";
@@ -145,7 +143,7 @@ public class AuthController {
             mailService.sendMail(user.getUsername(), user.getFullName(), code);
 
             MailCode mailCode = new MailCode();
-            mailCode.setMail(loginDTO.getFullName());
+            mailCode.setMail(registerRequest.getFullName());
             mailCode.setCode(code);
             mailCode.setCreatedAt(new Date());
             mailCodeService.createMailCode(mailCode);

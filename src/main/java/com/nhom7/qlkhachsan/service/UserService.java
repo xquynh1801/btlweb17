@@ -1,8 +1,9 @@
 package com.nhom7.qlkhachsan.service;
 
-import com.nhom7.qlkhachsan.entity.UserMessage;
+import com.nhom7.qlkhachsan.dto.request.RegisterRequest;
 import com.nhom7.qlkhachsan.entity.user.User;
 
+import javax.mail.MessagingException;
 import java.util.List;
 
 public interface UserService {
@@ -14,9 +15,9 @@ public interface UserService {
 
     List<User> getAll();
 
-    UserMessage confirmSecretKey(String secretKey);
+    void confirmSecretKey(String secretKey, String otp);
 
-    UserMessage saveToRedis(UserMessage userMessage);
+    List<User> getUserInRedis();
 
-    List<UserMessage> getUserInRedis();
+    void registerUser(RegisterRequest request) throws MessagingException;
 }

@@ -1,7 +1,6 @@
 package com.nhom7.qlkhachsan.controller;
 
-import com.nhom7.qlkhachsan.dto.ObjectResponse;
-import com.nhom7.qlkhachsan.entity.hotel.BookingRoom;
+import com.nhom7.qlkhachsan.dto.response.ObjectResponse;
 import com.nhom7.qlkhachsan.entity.hotel.Hotel;
 import com.nhom7.qlkhachsan.entity.hotel.Room;
 import com.nhom7.qlkhachsan.entity.user.User;
@@ -16,7 +15,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -28,7 +26,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping(path = "/admin", produces = "application/json")
@@ -53,13 +50,13 @@ public class AdminController {
     @GetMapping("/users")
     public ObjectResponse getAllUsers(){
         try{
-//            List<User> userList = userService.getAll();
+            List<User> userList = userService.getAll();
 //            userList.forEach(x->{
 //                redisTemplate.opsForValue().set(x.getUsername(), x);
 //            });
 //            redisTemplate.opsForValue().set("listUsers", userList);
-//            return new ObjectResponse(HttpStatus.OK.value(), "Users", userService.getAll());
-            return new ObjectResponse(HttpStatus.OK.value(), "Users", redisTemplate.opsForValue().get("listUsers"));
+            return new ObjectResponse(HttpStatus.OK.value(), "Users", userService.getAll());
+//            return new ObjectResponse(HttpStatus.OK.value(), "Users", redisTemplate.opsForValue().get("listUsers"));
         }catch (Exception e){
             log.info(e.getMessage());
             return new ObjectResponse(HttpStatus.BAD_REQUEST.value(), "Users");
