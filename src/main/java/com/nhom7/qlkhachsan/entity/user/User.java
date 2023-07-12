@@ -5,9 +5,13 @@ import com.nhom7.qlkhachsan.entity.hotel.BookingRoom;
 import com.nhom7.qlkhachsan.entity.hotel.Hotel;
 import com.nhom7.qlkhachsan.entity.rating.Comment;
 import com.nhom7.qlkhachsan.entity.rating.Follow;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -15,7 +19,10 @@ import java.util.Set;
 @Data
 @Entity
 @Table(name="user")
-public class User extends BaseEntity {
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class User extends BaseEntity implements Serializable {
     @Column(nullable = false, unique = true)
     private String username;
 
@@ -37,15 +44,15 @@ public class User extends BaseEntity {
     @JoinTable(name="user_role", joinColumns = @JoinColumn(name="user_id"), inverseJoinColumns = @JoinColumn(name="role_id"))
     private Set<Role> roles = new HashSet<>();
 
-    @OneToMany(mappedBy = "userFollow")
+    @OneToMany(mappedBy = "userFollow", fetch = FetchType.EAGER )
     private Set<Follow> follows;
 
-    @OneToMany(mappedBy = "userComment")
+    @OneToMany(mappedBy = "userComment", fetch = FetchType.EAGER)
     private Set<Comment> comments;
 
-    @OneToMany(mappedBy = "userBook")
+    @OneToMany(mappedBy = "userBook", fetch = FetchType.EAGER)
     private Set<BookingRoom> bookingRoomSet;
 
-    @OneToMany(mappedBy = "owner")
+    @OneToMany(mappedBy = "owner", fetch = FetchType.EAGER)
     private Set<Hotel> hotels;
 }

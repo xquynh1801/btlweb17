@@ -9,11 +9,12 @@ import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.io.Serializable;
 
 @Data
 @Entity
 @Table(name="comment")
-public class Comment extends BaseEntity {
+public class Comment extends BaseEntity  implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="user_id", nullable = false)
     private User userComment;

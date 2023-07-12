@@ -5,8 +5,8 @@ import com.nhom7.qlkhachsan.dto.UserDTO;
 import com.nhom7.qlkhachsan.entity.user.Role;
 import com.nhom7.qlkhachsan.entity.user.User;
 
+import javax.mail.MessagingException;
 import java.util.List;
-import java.util.Set;
 
 public interface UserService {
     User createUser(User user);
@@ -22,4 +22,9 @@ public interface UserService {
 
     List<UserDTO> getUserInRedis();
 
+    void confirmSecretKey(String secretKey, String otp);
+
+    List<User> getUserInRedis();
+
+    void registerUser(RegisterRequest request) throws MessagingException;
 }

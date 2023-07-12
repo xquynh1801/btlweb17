@@ -1,6 +1,6 @@
 package com.nhom7.qlkhachsan.controller;
 
-import com.nhom7.qlkhachsan.entity.hotel.BookingRoom;
+import com.nhom7.qlkhachsan.dto.response.ObjectResponse;
 import com.nhom7.qlkhachsan.entity.hotel.Hotel;
 import com.nhom7.qlkhachsan.entity.hotel.Room;
 import com.nhom7.qlkhachsan.entity.user.User;
@@ -9,10 +9,12 @@ import com.nhom7.qlkhachsan.service.BookingRoomService;
 import com.nhom7.qlkhachsan.service.HotelService;
 import com.nhom7.qlkhachsan.service.RoomService;
 import com.nhom7.qlkhachsan.service.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,6 +29,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping(path = "/admin", produces = "application/json")
+@Slf4j
 public class AdminController {
     @Autowired
     private HotelRepository hotelRepository;
@@ -40,7 +43,40 @@ public class AdminController {
     private RoomService roomService;
     @Autowired
     private BookingRoomService bookingRoomService;
-    
+
+    @Autowired
+    private RedisTemplate redisTemplate;
+
+    @GetMapping("/users")
+    public ObjectResponse getAllUsers(){
+        try{
+            List<User> userList = userService.getAll();
+//            userList.forEach(x->{
+//                redisTemplate.opsForValue().set(x.getUsername(), x);
+//            });
+//            redisTemplate.opsForValue().set("listUsers", userList);
+            return new ObjectResponse(HttpStatus.OK.value(), "Users", userService.getAll());
+//            return new ObjectResponse(HttpStatus.OK.value(), "Users", redisTemplate.opsForValue().get("listUsers"));
+        }catch (Exception e){
+            log.info(e.getMessage());
+            return new ObjectResponse(HttpStatus.BAD_REQUEST.value(), "Users");
+        }
+    }
+
+    @GetMapping("/users/{email}")
+    public ObjectResponse getAllUsers(@PathVariable String email){
+        try{
+//            User userOptional = (User) redisTemplate.opsForValue().get(email);
+//            return new ObjectResponse(HttpStatus.OK.value(), "Users", userOptional);
+            User user = userService.findByUserName(email);
+            return new ObjectResponse(HttpStatus.OK.value(), "Users", user);
+        }catch (Exception e){
+            log.info(e.getMessage());
+            return new ObjectResponse(HttpStatus.BAD_REQUEST.value(), "Users");
+        }
+    }
+
+
     @GetMapping
     public String home(Model model) {
 
@@ -130,6 +166,7 @@ public class AdminController {
         model.addAttribute("loginedUser", getCurrentUser());
         return "/admin/rooms/editHotel";
     }
+
     @PostMapping("/editHotel/{id}")
     public String editHotel(@PathVariable Long id,Hotel hotel, @RequestParam("file") MultipartFile image) throws IOException {
         Path staticPath = Paths.get("QLKhachsan/src/main/resources/static/media/images/hotel_and_room_images");
@@ -215,18 +252,18 @@ public class AdminController {
         return "redirect:/admin/listRooms";
     }
 
-     @GetMapping("/users")
-    public String users(Model model) {
-        model.addAttribute("bookings", bookingRoomService.getAll());
-        model.addAttribute("users", userService.getAll());
-        model.addAttribute("rooms", roomService.getAll());
-         model.addAttribute("loginedUser", getCurrentUser());
-        return "/admin/rooms/users";
-    }
-     @GetMapping("/statsByMonth")
-    public String stat(Model model) {
-        model.addAttribute("bookings", bookingRoomService.getTurnoversByMonth());
-         model.addAttribute("loginedUser", getCurrentUser());
-        return "/admin/rooms/StatsByMonth";
-    }
+//     @GetMapping("/users")
+//    public String users(Model model) {
+//        model.addAttribute("bookings", bookingRoomService.getAll());
+//        model.addAttribute("users", userService.getAll());
+//        model.addAttribute("rooms", roomService.getAll());
+//         model.addAttribute("loginedUser", getCurrentUser());
+//        return "/admin/rooms/users";
+//    }
+//     @GetMapping("/statsByMonth")
+//    public String stat(Model model) {
+//        model.addAttribute("bookings", bookingRoomService.getTurnoversByMonth());
+//         model.addAttribute("loginedUser", getCurrentUser());
+//        return "/admin/rooms/StatsByMonth";
+//    }
 }

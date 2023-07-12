@@ -4,12 +4,13 @@ import com.nhom7.qlkhachsan.entity.BaseEntity;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.Set;
 
 @Data
 @Entity
 @Table(name = "room")
-public class Room extends BaseEntity {
+public class Room extends BaseEntity  implements Serializable {
     @Column(nullable = false, unique = true)
     private String roomName;
 

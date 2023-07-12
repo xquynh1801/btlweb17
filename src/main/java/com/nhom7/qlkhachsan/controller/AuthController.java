@@ -1,5 +1,6 @@
 package com.nhom7.qlkhachsan.controller;
 
+import com.nhom7.qlkhachsan.dto.request.RegisterRequest;
 import com.nhom7.qlkhachsan.base.Error;
 import com.nhom7.qlkhachsan.base.ObjectResponse;
 import com.nhom7.qlkhachsan.dto.LoginDTO;

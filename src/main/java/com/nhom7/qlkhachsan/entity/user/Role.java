@@ -6,12 +6,13 @@ import lombok.Data;
 import javax.persistence.Entity;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
+import java.io.Serializable;
 import java.util.Set;
 
 @Entity
 @Data
 @Table(name="role")
-public class Role extends BaseEntity {
+public class Role extends BaseEntity implements Serializable {
     private String roleName;
 //
 //    @ManyToMany(mappedBy = "roles")
