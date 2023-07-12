@@ -1,5 +1,6 @@
 package com.nhom7.qlkhachsan.entity.hotel;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.nhom7.qlkhachsan.entity.BaseEntity;
 import com.nhom7.qlkhachsan.entity.rating.Comment;
 import com.nhom7.qlkhachsan.entity.rating.Follow;

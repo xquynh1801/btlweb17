@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/admin")
+@RequestMapping(path = "/admin", produces = "application/json")
 @Slf4j
 public class AdminController {
     @Autowired
@@ -44,7 +44,6 @@ public class AdminController {
 
     @Autowired
     private RoomService roomService;
-
     @Autowired
     private BookingRoomService bookingRoomService;
 

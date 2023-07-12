@@ -36,6 +36,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User findByFullName(String fullName) {
+        return userRepository.findByFullName(fullName);
+    }
+
+    @Override
     public List<User> getAll() {
         return userRepository.findAll();
     }

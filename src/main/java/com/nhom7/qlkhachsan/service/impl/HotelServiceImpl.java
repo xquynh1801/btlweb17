@@ -1,5 +1,6 @@
 package com.nhom7.qlkhachsan.service.impl;
 
+import com.nhom7.qlkhachsan.dto.HotelDTO;
 import com.nhom7.qlkhachsan.entity.hotel.Hotel;
 import com.nhom7.qlkhachsan.entity.hotel.Room;
 import com.nhom7.qlkhachsan.entity.rating.Comment;
@@ -7,6 +8,7 @@ import com.nhom7.qlkhachsan.entity.rating.Follow;
 import com.nhom7.qlkhachsan.entity.user.User;
 import com.nhom7.qlkhachsan.repository.*;
 import com.nhom7.qlkhachsan.service.HotelService;
+import com.nhom7.qlkhachsan.utils.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -31,8 +33,8 @@ public class HotelServiceImpl implements HotelService {
     private CommentRepository commentRepository;
 
     @Override
-    public List<Hotel> getAll() {
-        return hotelRepository.findAll();
+    public List<HotelDTO> getAll() {
+        return ModelMapper.hotelMapper(hotelRepository.findAll());
     }
 
     @Override
@@ -46,8 +48,8 @@ public class HotelServiceImpl implements HotelService {
     }
 
     @Override
-    public Hotel getHotelByID(Long id) {
-        return hotelRepository.getById(id);
+    public HotelDTO getHotelByID(Long id) {
+        return ModelMapper.hotelMapper1(hotelRepository.getById(id));
     }
 
     @Override

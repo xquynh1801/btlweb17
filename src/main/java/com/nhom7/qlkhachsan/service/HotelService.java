@@ -1,5 +1,6 @@
 package com.nhom7.qlkhachsan.service;
 
+import com.nhom7.qlkhachsan.dto.HotelDTO;
 import com.nhom7.qlkhachsan.entity.hotel.Hotel;
 import com.nhom7.qlkhachsan.entity.hotel.Room;
 import com.nhom7.qlkhachsan.entity.rating.Comment;
@@ -9,13 +10,13 @@ import com.nhom7.qlkhachsan.entity.user.User;
 import java.util.List;
 
 public interface HotelService {
-    List<Hotel> getAll();
+    List<HotelDTO> getAll();
 
     List<Hotel> searchHotelByName(String nameHotel);
 
     Hotel getHotelByName(String nameHotel);
 
-    Hotel getHotelByID(Long id);
+    HotelDTO getHotelByID(Long id);
     
     List<Hotel> getHotelsByOwner(User user);
 
