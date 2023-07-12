@@ -30,8 +30,6 @@ public class EmailFormatInterceptor implements HandlerInterceptor {
     @Autowired
     private ObjectMapper objectMapper;
 
-
-
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         if (handler instanceof HandlerMethod) {
