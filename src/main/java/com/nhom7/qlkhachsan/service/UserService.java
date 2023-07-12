@@ -1,8 +1,6 @@
 package com.nhom7.qlkhachsan.service;
 
-import com.nhom7.qlkhachsan.dto.LoginDTO;
-import com.nhom7.qlkhachsan.dto.UserDTO;
-import com.nhom7.qlkhachsan.entity.user.Role;
+import com.nhom7.qlkhachsan.dto.request.RegisterRequest;
 import com.nhom7.qlkhachsan.entity.user.User;
 
 import javax.mail.MessagingException;
@@ -16,11 +14,8 @@ public interface UserService {
     User findByFullName(String fullName);
 
     List<User> getAll();
-    UserDTO confirmSecretKey(String secretKey);
 
-    UserDTO saveToRedis(UserDTO userDTO);
-
-    List<UserDTO> getUserInRedis();
+    void saveToRedis(RegisterRequest userDTO);
 
     void confirmSecretKey(String secretKey, String otp);
 

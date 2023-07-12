@@ -1,16 +1,12 @@
 package com.nhom7.qlkhachsan.controller;
 
-import com.nhom7.qlkhachsan.dto.request.RegisterRequest;
 import com.nhom7.qlkhachsan.base.Error;
 import com.nhom7.qlkhachsan.base.ObjectResponse;
-import com.nhom7.qlkhachsan.dto.LoginDTO;
-import com.nhom7.qlkhachsan.dto.UserDTO;
 import com.nhom7.qlkhachsan.dto.ValidateMailCodeForm;
+import com.nhom7.qlkhachsan.dto.request.RegisterRequest;
 import com.nhom7.qlkhachsan.entity.mailcode.MailCode;
 import com.nhom7.qlkhachsan.entity.user.Role;
 import com.nhom7.qlkhachsan.entity.user.User;
-import com.nhom7.qlkhachsan.gmail.GmailForm;
-import com.nhom7.qlkhachsan.gmail.Gmailer;
 import com.nhom7.qlkhachsan.repository.MailCodeRepository;
 import com.nhom7.qlkhachsan.repository.RoleRepository;
 import com.nhom7.qlkhachsan.repository.UserRepository;
@@ -22,7 +18,6 @@ import com.nhom7.qlkhachsan.utils.JwtTokenUtil;
 import com.nhom7.qlkhachsan.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -114,23 +109,23 @@ public class AuthController {
         }, countdownDuration, TimeUnit.MILLISECONDS);
     }
 
-    @PostMapping(value = "/register")
-    @ResponseBody
-    public ObjectResponse registerUser(HttpServletRequest request){
-        LoginDTO loginDTO = (LoginDTO) request.getAttribute("loginDTO");
-        System.out.println("==========requestEmail: "+loginDTO.getFullName());
-        try {
-            User user = userService.findByFullName(loginDTO.getFullName());
-            System.out.println("======97=====>check mail " + user.getFullName());
-            if (user!=null){
-                System.out.println("======99=====>email da ton tai " + user.getFullName());
-                return new ObjectResponse(Error.NOT_OK.getErrorCode(), Error.NOT_OK.getMessage(), null);
-            }
-        }catch (Exception e){
-            // todo
-        }
-        try{
-            Random generator = new Random();
+//    @PostMapping(value = "/register")
+//    @ResponseBody
+//    public ObjectResponse registerUser(HttpServletRequest request){
+//        RegisterRequest loginDTO = (RegisterRequest) request.getAttribute("loginDTO");
+//        System.out.println("==========requestEmail: "+loginDTO.getFullName());
+//        try {
+//            User user = userService.findByFullName(loginDTO.getFullName());
+//            System.out.println("======97=====>check mail " + user.getFullName());
+//            if (user!=null){
+//                System.out.println("======99=====>email da ton tai " + user.getFullName());
+//                return new ObjectResponse(Error.NOT_OK.getErrorCode(), Error.NOT_OK.getMessage(), null);
+//            }
+//        }catch (Exception e){
+//            // todo
+//        }
+//        try{
+//            Random generator = new Random();
 //            User user = new User();
 //
 //            user.setUsername(loginDTO.getUsername());
@@ -146,24 +141,24 @@ public class AuthController {
 //            user.setRoles(roles);
 //            userService.createUser(user);
 
-            int code = generator.nextInt((9999 - 1000) + 1) + 1000;
-            UserDTO userDTO = new UserDTO();
-
-            userDTO.setUsername(loginDTO.getUsername());
-            userDTO.setPassword(new BCryptPasswordEncoder().encode(loginDTO.getPassword()));
-            userDTO.setOtpSignUp(String.valueOf(code));
-            userDTO.setFullName(loginDTO.getFullName());
-            userDTO.setAge(loginDTO.getAge());
-            userDTO.setPhoneNumber(loginDTO.getPhoneNumber());
-            userDTO.setIdentityCardNumber(loginDTO.getIdentityCardNumber());
-
-            Role role = roleRepository.findByRoleName("ROLE_USER");
-            HashSet roles = new HashSet();
-            roles.add(role);
-//            user.setRoles(roles);
-            userService.saveToRedis(userDTO);
-            authenCode.put(userDTO.getFullName(), code);
-            mailService.sendMail(userDTO.getUsername(), userDTO.getFullName(), code);
+//            int code = generator.nextInt((9999 - 1000) + 1) + 1000;
+//            UserDTO userDTO = new UserDTO();
+//
+//            userDTO.setUsername(loginDTO.getUsername());
+//            userDTO.setPassword(new BCryptPasswordEncoder().encode(loginDTO.getPassword()));
+//            userDTO.setOtpSignUp(String.valueOf(code));
+//            userDTO.setFullName(loginDTO.getFullName());
+//            userDTO.setAge(loginDTO.getAge());
+//            userDTO.setPhoneNumber(loginDTO.getPhoneNumber());
+//            userDTO.setIdentityCardNumber(loginDTO.getIdentityCardNumber());
+//
+//            Role role = roleRepository.findByRoleName("ROLE_USER");
+//            HashSet roles = new HashSet();
+//            roles.add(role);
+////            user.setRoles(roles);
+//            userService.saveToRedis(userDTO);
+//            authenCode.put(userDTO.getFullName(), code);
+//            mailService.sendMail(userDTO.getUsername(), userDTO.getFullName(), code);
 
 //            MailCode mailCode = new MailCode();
 //            mailCode.setMail(loginDTO.getFullName());
@@ -171,12 +166,12 @@ public class AuthController {
 //            mailCode.setCreatedAt(new Date());
 //            mailCodeService.createMailCode(mailCode);
 
-            System.out.println("code: "+ authenCode.get(userDTO.getFullName()).toString());
-            return new ObjectResponse(Error.OK.getErrorCode(), Error.OK.getMessage(), null);
-        }catch (Exception e){
-            return new ObjectResponse(Error.NOT_OK.getErrorCode(), Error.NOT_OK.getMessage(), null);
-        }
-    }
+//            System.out.println("code: "+ authenCode.get(userDTO.getFullName()).toString());
+//            return new ObjectResponse(Error.OK.getErrorCode(), Error.OK.getMessage(), null);
+//        }catch (Exception e){
+//            return new ObjectResponse(Error.NOT_OK.getErrorCode(), Error.NOT_OK.getMessage(), null);
+//        }
+//    }
 
     @GetMapping("/signup")
     String register(Model model){

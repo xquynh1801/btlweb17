@@ -1,9 +1,6 @@
 package com.nhom7.qlkhachsan.service.impl;
 
 import com.nhom7.qlkhachsan.dto.request.RegisterRequest;
-import com.nhom7.qlkhachsan.dto.response.ErrorResponse;
-import com.nhom7.qlkhachsan.dto.LoginDTO;
-import com.nhom7.qlkhachsan.dto.UserDTO;
 import com.nhom7.qlkhachsan.entity.user.Role;
 import com.nhom7.qlkhachsan.entity.user.User;
 import com.nhom7.qlkhachsan.repository.RoleRepository;
@@ -18,18 +15,15 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring5.SpringTemplateEngine;
 
 import java.time.Duration;
 import java.util.List;
-import java.util.Set;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
-import java.time.Duration;
 import java.util.*;
 
 @Service
@@ -52,8 +46,6 @@ public class UserServiceImpl implements UserService {
     private SpringTemplateEngine templateEngine;
     @Autowired
     private UserRepository userRepository;
-    @Autowired
-    private RedisTemplate redisTemplate;
 
     @Override
     public User createUser(User user) {
