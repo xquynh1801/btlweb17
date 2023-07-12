@@ -5,12 +5,13 @@ import com.nhom7.qlkhachsan.entity.user.User;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.Date;
 
 @Data
 @Entity
 @Table(name="booking")
-public class BookingRoom extends BaseEntity {
+public class BookingRoom extends BaseEntity  implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="user_id")
     private User userBook;

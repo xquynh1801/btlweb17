@@ -17,10 +17,11 @@ import java.util.Date;
 @EnableRedisRepositories
 public class UserMessage implements Serializable {
     @Id
-    private String userId;
     private String email;
     private String password;
-    private Date createdDate;
-    private Date expiredDate;
     private String otpSignUp;
+    private String fullName;
+    private Integer age;
+    private String phoneNumber;
+    private String identityCardNumber;
 }

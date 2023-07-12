@@ -6,11 +6,12 @@ import com.nhom7.qlkhachsan.entity.user.User;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.io.Serializable;
 
 @Data
 @Entity
 @Table(name="follow")
-public class Follow extends BaseEntity {
+public class Follow extends BaseEntity  implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="user_id", nullable = false)
     private User userFollow;

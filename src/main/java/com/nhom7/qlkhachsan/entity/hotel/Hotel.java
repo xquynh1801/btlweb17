@@ -9,13 +9,14 @@ import lombok.Data;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
+import java.io.Serializable;
 import java.util.List;
 import java.util.Set;
 
 @Data
 @Entity
 @Table(name="hotel")
-public class Hotel extends BaseEntity {
+public class Hotel extends BaseEntity  implements Serializable {
     @NotBlank
     @Column(nullable = false)
     private String name;

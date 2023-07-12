@@ -1,10 +1,13 @@
 package com.nhom7.qlkhachsan.controller;
 
+import com.nhom7.qlkhachsan.dto.ObjectResponse;
 import com.nhom7.qlkhachsan.entity.UserMessage;
+import com.nhom7.qlkhachsan.entity.user.User;
 import com.nhom7.qlkhachsan.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.web.bind.annotation.*;
@@ -30,6 +33,7 @@ public class RegisterController {
     private String loginPath;
 
 
+
     private final UserService userService;
     private final JavaMailSender mailSender;
     private final SpringTemplateEngine templateEngine;
@@ -37,17 +41,9 @@ public class RegisterController {
     @PostMapping("/register")
     public String register(@RequestBody UserMessage userMessage){
         try{
-            String userId = UUID.randomUUID().toString();
-            userMessage.setUserId(userId);
-            userMessage.setCreatedDate(new Date());
             String otp= new DecimalFormat("000000").format(new Random().nextInt(999999));
 
-            Calendar c = Calendar.getInstance();
-            c.setTime(new Date());
-            c.add(Calendar.SECOND, 120);
-
             userMessage.setOtpSignUp(otp);
-            userMessage.setExpiredDate(c.getTime());
             userService.saveToRedis(userMessage);
             sendConfirmLink(userMessage);
             return "Confirm email";
@@ -61,7 +57,7 @@ public class RegisterController {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, StandardCharsets.UTF_8.name());
         Context context = new Context();
-        String linkConfirm = String.format("%s/confirm-user/%s", "http://localhost:8080", user.getUserId());
+        String linkConfirm = String.format("%s/confirm-user/%s", "http://localhost:8080", user.getEmail());
         Map<String, Object> properties = new HashMap<>();
         properties.put("linkConfirm", linkConfirm);
         context.setVariables(properties);
@@ -76,21 +72,29 @@ public class RegisterController {
     }
 
     @GetMapping(path = "/confirm-user/{secretKey}/{otp}")
-    public String confirmUser(@PathVariable String secretKey, @PathVariable String otp, HttpServletResponse response) throws IOException {
+    public ObjectResponse confirmUser(@PathVariable String secretKey, @PathVariable String otp) throws IOException {
 
         try {
             UserMessage user = userService.confirmSecretKey(secretKey);
             if(otp.equals(user.getOtpSignUp())) {
-                log.info("Done");
-                return "Verify success";
+                log.info("Verify success, save user to DB");
+                userService.createUser(User.builder()
+                                .username(user.getEmail())
+                                .fullName(user.getFullName())
+                                .age(user.getAge())
+                                .password(user.getPassword())
+                                .identityCardNumber(user.getIdentityCardNumber())
+                                .phoneNumber(user.getPhoneNumber())
+                        .build());
+                return new ObjectResponse(HttpStatus.BAD_REQUEST.value(), "Verify success");
             }
             else{
                 log.info("Not match");
-                return "OTP not match";
+                return new ObjectResponse(HttpStatus.BAD_REQUEST.value(), "OTP not match");
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            return "Verify error";
+            return new ObjectResponse(HttpStatus.BAD_REQUEST.value(), "Verify error");
         }
     }
 
