@@ -1,5 +1,7 @@
 package com.nhom7.qlkhachsan.controller;
 
+import com.nhom7.qlkhachsan.base.Error;
+import com.nhom7.qlkhachsan.base.ObjectResponse;
 import com.nhom7.qlkhachsan.dto.LoginDTO;
 import com.nhom7.qlkhachsan.dto.ValidateMailCodeForm;
 import com.nhom7.qlkhachsan.entity.mailcode.MailCode;
@@ -7,6 +9,7 @@ import com.nhom7.qlkhachsan.entity.user.Role;
 import com.nhom7.qlkhachsan.entity.user.User;
 import com.nhom7.qlkhachsan.gmail.GmailForm;
 import com.nhom7.qlkhachsan.gmail.Gmailer;
+import com.nhom7.qlkhachsan.repository.MailCodeRepository;
 import com.nhom7.qlkhachsan.repository.RoleRepository;
 import com.nhom7.qlkhachsan.repository.UserRepository;
 import com.nhom7.qlkhachsan.security.CustomUserDetaisService;
@@ -17,12 +20,14 @@ import com.nhom7.qlkhachsan.utils.JwtTokenUtil;
 import com.nhom7.qlkhachsan.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -57,6 +62,8 @@ public class AuthController {
     private UserRepository userRepository;
 
     @Autowired
+    private MailCodeRepository mailCodeRepository;
+    @Autowired
     private MailCodeService mailCodeService;
 
     @Value("${countdown.timer.duration}")
@@ -64,7 +71,7 @@ public class AuthController {
 
     @PostMapping(value = "/check")
     @ResponseBody
-    public String validateCode(@RequestBody ValidateMailCodeForm validateMailCodeForm){
+    public ObjectResponse validateCode(@RequestBody ValidateMailCodeForm validateMailCodeForm){
         Date date = new Date();
         User user = userService.findByFullName(validateMailCodeForm.getMail());
         System.out.println("==============>user: " + user.getUsername());
@@ -81,18 +88,17 @@ public class AuthController {
         long seconds = duration.getSeconds(); // Tổng số giây
         System.out.println("==============>seconds: " + seconds);
         long absoluteValue = Math.abs(seconds);
-        String res = "";
         if(absoluteValue < 120 && validateMailCodeForm.getCode()==mailCode.getCode()){
-            res = "thanh cong";
+            return new ObjectResponse(Error.OK.getErrorCode(), Error.OK.getMessage(), null);
         }
         else if (absoluteValue < 120 && validateMailCodeForm.getCode()!=mailCode.getCode()) {
-            res = "nhap sai code -> that bai";
+            return new ObjectResponse(Error.NOT_OK.getErrorCode(), Error.NOT_OK.getMessage(), null);
         }
         else{
             userRepository.delete(user);
-            res = "het han code -> that bai";
+            mailCodeRepository.delete(mailCode);
+            return new ObjectResponse(Error.NOT_OK.getErrorCode(), Error.NOT_OK.getMessage(), null);
         }
-        return res;
     }
 
     private void startCountdownTimer(String recipientEmail, int code) {
@@ -108,14 +114,15 @@ public class AuthController {
 
     @PostMapping(value = "/register")
     @ResponseBody
-    public String registerUser(@RequestBody LoginDTO loginDTO){
+    public ObjectResponse registerUser(HttpServletRequest request){
+        LoginDTO loginDTO = (LoginDTO) request.getAttribute("loginDTO");
+        System.out.println("==========requestEmail: "+loginDTO.getFullName());
         try {
-            String res = "email da ton tai";
             User user = userService.findByFullName(loginDTO.getFullName());
             System.out.println("======97=====>check mail " + user.getFullName());
             if (user!=null){
                 System.out.println("======99=====>email da ton tai " + user.getFullName());
-                return res;
+                return new ObjectResponse(Error.NOT_OK.getErrorCode(), Error.NOT_OK.getMessage(), null);
             }
         }catch (Exception e){
             // todo
@@ -132,7 +139,6 @@ public class AuthController {
             user.setIdentityCardNumber(loginDTO.getIdentityCardNumber());
 
             Role role = roleRepository.findByRoleName("ROLE_USER");
-            String res = "thanh cong";
             HashSet roles = new HashSet();
             roles.add(role);
             user.setRoles(roles);
@@ -152,10 +158,9 @@ public class AuthController {
 
 //            startCountdownTimer(loginDTO.getFullName(), code);
             System.out.println("code: "+ authenCode.get(user.getFullName()).toString());
-            return res;
+            return new ObjectResponse(Error.OK.getErrorCode(), Error.OK.getMessage(), null);
         }catch (Exception e){
-            String res = "that bai";
-            return res;
+            return new ObjectResponse(Error.NOT_OK.getErrorCode(), Error.NOT_OK.getMessage(), null);
         }
     }
 

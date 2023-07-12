@@ -1,69 +1,73 @@
 package com.nhom7.qlkhachsan.interceptor;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.nhom7.qlkhachsan.dto.LoginDTO;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.util.ContentCachingRequestWrapper;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Component
 public class EmailFormatInterceptor implements HandlerInterceptor {
     private static final String EMAIL_REGEX = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
+
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        // Kiểm tra định dạng email
-        String requestBody = StreamUtils.copyToString(request.getInputStream(), StandardCharsets.UTF_8);
-        String email = extractEmailFromRequestBody(requestBody);
-        boolean isValidEmail = validateEmailFormat(email);
-        if (!isValidEmail) {
-            // Nếu email không hợp lệ, chuyển hướng người dùng đến trang lỗi
-//            response.sendRedirect("/error");
-            System.out.println("===========>ValidEmail");
-            return false; // Dừng xử lý các interceptor và controller khác
-        }
-        return true; // Cho phép đi tiếp đến interceptor và controller tiếp theo
-    }
+        if (handler instanceof HandlerMethod) {
+            HandlerMethod handlerMethod = (HandlerMethod) handler;
+            if (handlerMethod.hasMethodAnnotation(PostMapping.class)) {
+                PostMapping postMapping = handlerMethod.getMethodAnnotation(PostMapping.class);
+                String[] mappingValues = postMapping.value();
+                if (mappingValues.length > 0 && "/register".equals(mappingValues[0])) {
+                    // Sử dụng HttpServletRequestWrapper để đọc dữ liệu từ request body
+                    HttpServletRequestWrapper requestWrapper = new ContentCachingRequestWrapper(request);
+                    BufferedReader bf = new BufferedReader(new InputStreamReader(requestWrapper.getInputStream()));
+                    String requestBody = "";
+                    String tmp = "";
+                    while((tmp=bf.readLine())!=null){
+                        requestBody += tmp;
+                    }
 
-    @Override
-    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
-        // Không cần thực hiện xử lý sau khi controller được xử lý
-    }
+                    // Parse thông tin từ request body thành đối tượng LoginDTO
+                    LoginDTO loginDTO = objectMapper.readValue(requestBody, LoginDTO.class);
+                    request.setAttribute("loginDTO", loginDTO);
 
-    @Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-        // Không cần thực hiện xử lý sau khi view đã được render hoàn thành
-    }
-
-    public static boolean isValidEmail(String email) {
-        Pattern pattern = Pattern.compile(EMAIL_REGEX);
-        Matcher matcher = pattern.matcher(email);
-        return matcher.matches();
-    }
-    private boolean validateEmailFormat(String email) {
-        if (isValidEmail(email)) {
-            return false;
+                    // Kiểm tra định dạng email
+                    String email = loginDTO.getFullName();
+                    if (!isValidEmail(email)) {
+                        // Nếu định dạng email không hợp lệ, trả về lỗi
+                        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                        response.getWriter().write("Invalid email format");
+                        return false;
+                    }
+                }
+            }
         }
         return true;
     }
-    private String extractEmailFromRequestBody(String requestBody) {
-        // Trích xuất dữ liệu email từ body của yêu cầu
-        // Tùy thuộc vào cấu trúc body của yêu cầu, bạn có thể sử dụng các thư viện như Gson hoặc Jackson để phân tích dữ liệu JSON hoặc XML.
-        // Trong ví dụ này, giả sử body của yêu cầu là một chuỗi JSON với thuộc tính "email"
-        if (!StringUtils.isEmpty(requestBody)) {
-            // Giả sử sử dụng thư viện Gson để phân tích JSON
-            Gson gson = new Gson();
-            JsonObject jsonObject = gson.fromJson(requestBody, JsonObject.class);
-            if (jsonObject.has("fullName")) {
-                return jsonObject.get("fullName").getAsString();
-            }
-        }
-        return null;
+    private boolean isValidEmail(String email) {
+        // Kiểm tra định dạng email
+        return email != null && email.matches(EMAIL_REGEX);
     }
 }
