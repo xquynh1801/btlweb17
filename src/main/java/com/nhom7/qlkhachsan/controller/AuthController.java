@@ -3,6 +3,7 @@ package com.nhom7.qlkhachsan.controller;
 import com.nhom7.qlkhachsan.base.Error;
 import com.nhom7.qlkhachsan.base.ObjectResponse;
 import com.nhom7.qlkhachsan.dto.LoginDTO;
+import com.nhom7.qlkhachsan.dto.UserDTO;
 import com.nhom7.qlkhachsan.dto.ValidateMailCodeForm;
 import com.nhom7.qlkhachsan.entity.mailcode.MailCode;
 import com.nhom7.qlkhachsan.entity.user.Role;
@@ -129,35 +130,47 @@ public class AuthController {
         }
         try{
             Random generator = new Random();
-            User user = new User();
+//            User user = new User();
+//
+//            user.setUsername(loginDTO.getUsername());
+//            user.setPassword(new BCryptPasswordEncoder().encode(loginDTO.getPassword()));
+//            user.setFullName(loginDTO.getFullName());
+//            user.setAge(loginDTO.getAge());
+//            user.setPhoneNumber(loginDTO.getPhoneNumber());
+//            user.setIdentityCardNumber(loginDTO.getIdentityCardNumber());
+//
+//            Role role = roleRepository.findByRoleName("ROLE_USER");
+//            HashSet roles = new HashSet();
+//            roles.add(role);
+//            user.setRoles(roles);
+//            userService.createUser(user);
 
-            user.setUsername(loginDTO.getUsername());
-            user.setPassword(new BCryptPasswordEncoder().encode(loginDTO.getPassword()));
-            user.setFullName(loginDTO.getFullName());
-            user.setAge(loginDTO.getAge());
-            user.setPhoneNumber(loginDTO.getPhoneNumber());
-            user.setIdentityCardNumber(loginDTO.getIdentityCardNumber());
+            int code = generator.nextInt((9999 - 1000) + 1) + 1000;
+            UserDTO userDTO = new UserDTO();
+
+            userDTO.setUsername(loginDTO.getUsername());
+            userDTO.setPassword(new BCryptPasswordEncoder().encode(loginDTO.getPassword()));
+            userDTO.setOtpSignUp(String.valueOf(code));
+            userDTO.setFullName(loginDTO.getFullName());
+            userDTO.setAge(loginDTO.getAge());
+            userDTO.setPhoneNumber(loginDTO.getPhoneNumber());
+            userDTO.setIdentityCardNumber(loginDTO.getIdentityCardNumber());
 
             Role role = roleRepository.findByRoleName("ROLE_USER");
             HashSet roles = new HashSet();
             roles.add(role);
-            user.setRoles(roles);
-            userService.createUser(user);
+//            user.setRoles(roles);
+            userService.saveToRedis(userDTO);
+            authenCode.put(userDTO.getFullName(), code);
+            mailService.sendMail(userDTO.getUsername(), userDTO.getFullName(), code);
 
-            int code = generator.nextInt((9999 - 1000) + 1) + 1000;
-            authenCode.put(user.getFullName(), code);
+//            MailCode mailCode = new MailCode();
+//            mailCode.setMail(loginDTO.getFullName());
+//            mailCode.setCode(code);
+//            mailCode.setCreatedAt(new Date());
+//            mailCodeService.createMailCode(mailCode);
 
-//            new Gmailer().sendMail(user.getFullName(), "Xác thực email", GmailForm.mailForm(user.getUsername(), code));
-            mailService.sendMail(user.getUsername(), user.getFullName(), code);
-
-            MailCode mailCode = new MailCode();
-            mailCode.setMail(loginDTO.getFullName());
-            mailCode.setCode(code);
-            mailCode.setCreatedAt(new Date());
-            mailCodeService.createMailCode(mailCode);
-
-//            startCountdownTimer(loginDTO.getFullName(), code);
-            System.out.println("code: "+ authenCode.get(user.getFullName()).toString());
+            System.out.println("code: "+ authenCode.get(userDTO.getFullName()).toString());
             return new ObjectResponse(Error.OK.getErrorCode(), Error.OK.getMessage(), null);
         }catch (Exception e){
             return new ObjectResponse(Error.NOT_OK.getErrorCode(), Error.NOT_OK.getMessage(), null);
