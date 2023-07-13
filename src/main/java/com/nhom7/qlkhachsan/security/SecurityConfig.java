@@ -19,37 +19,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-
-        http.cors().disable();
-        http.csrf().disable();
-
+//
+//        http.authorizeRequests().antMatchers("/admin/**").access("hasRole('ROLE_MANAGER')");
+//
         http.authorizeRequests()
-                .antMatchers("/**", "/product/**","/login","/logout","/signup", "/js/**", "/css/**", "/media/**", "/scss/**", "/vendor/**")
-                .permitAll();
-        http.authorizeRequests().antMatchers("/auth/**").permitAll();
-        http.authorizeRequests()
-                .antMatchers("/reservation/**", "/hotel/**", "/my_reservation/**").access("hasAnyRole('ROLE_MANAGER','ROLE_USER')");
+                .antMatchers("/login/**", "/register/**", "/checkRegister/**", "/checkLogin/**","/logout","/signup").permitAll();
 
-        http.authorizeRequests()
-                .antMatchers("/admin/**").access("hasRole('ROLE_MANAGER')");
-
-        http.authorizeRequests()
-                .antMatchers("/","/login","/logout","/signup")
-                .permitAll();
-
-        //http.authorizeRequests().and().exceptionHandling().accessDeniedPage("/403");
-
-//        http.authorizeRequests().and()
-//                .formLogin()
-//                .loginPage("/login")
-//                .failureUrl("/login?fail=true")
-//                .and().logout().logoutSuccessUrl("/");
-
-        http.authorizeRequests().and()
-                .formLogin()
-                .loginPage("/login")
-                .failureUrl("/login?fail=true")
-                .and().logout().logoutSuccessUrl("/");
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.NEVER).and()   //let redis handle session creation
                 .csrf().disable().cors().and()
                 .requestCache().disable().exceptionHandling().and()                         //prevent exception creating duplicate session
@@ -67,7 +42,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     CustomUserDetaisService customUserDetailsService;
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
+    public static PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 

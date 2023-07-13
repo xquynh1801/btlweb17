@@ -4,6 +4,7 @@ import com.nhom7.qlkhachsan.dto.request.RegisterRequest;
 import com.nhom7.qlkhachsan.entity.user.User;
 
 import javax.mail.MessagingException;
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 public interface UserService {
@@ -19,7 +20,10 @@ public interface UserService {
 
     void confirmSecretKey(String secretKey, String otp);
 
+    void confirmSecretKeyLogin(String mail, String otp);
+
     List<User> getUserInRedis();
 
-    void registerUser(RegisterRequest request) throws MessagingException;
+    void registerUser(HttpServletRequest request) throws MessagingException;
+    void loginUser(String username, String password) throws MessagingException;
 }

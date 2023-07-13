@@ -1,25 +1,14 @@
 package com.nhom7.qlkhachsan.controller;
 
-import com.nhom7.qlkhachsan.dto.request.RegisterRequest;
 import com.nhom7.qlkhachsan.dto.response.ObjectResponse;
-import com.nhom7.qlkhachsan.entity.user.User;
 import com.nhom7.qlkhachsan.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.web.bind.annotation.*;
-import org.thymeleaf.context.Context;
-import org.thymeleaf.spring5.SpringTemplateEngine;
 
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.text.DecimalFormat;
-import java.util.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -29,7 +18,7 @@ public class RegisterController {
     private final UserService userService;
 
     @PostMapping("/register")
-    public ObjectResponse register(@RequestBody RegisterRequest request){
+    public ObjectResponse register(HttpServletRequest request){
         try{
             userService.registerUser(request);
             return new ObjectResponse(HttpStatus.OK.value(), "Verify OTP in email");
@@ -39,7 +28,7 @@ public class RegisterController {
         }
     }
 
-    @GetMapping(path = "/confirm-user/{secretKey}/{otp}")
+    @PostMapping(value = "/checkRegister/{secretKey}/{otp}")
     public ObjectResponse confirmUser(@PathVariable String secretKey, @PathVariable String otp) throws IOException {
         try {
             userService.confirmSecretKey(secretKey, otp);

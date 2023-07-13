@@ -1,4 +1,4 @@
-package com.nhom7.qlkhachsan.dto.request;
+package com.nhom7.qlkhachsan.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,18 +9,14 @@ import org.springframework.data.redis.repository.configuration.EnableRedisReposi
 import javax.persistence.Id;
 import java.io.Serializable;
 
-@RedisHash(value = "User_register")
-@EnableRedisRepositories
-@NoArgsConstructor
-@AllArgsConstructor
+
 @Data
-public class RegisterRequest implements Serializable {
-    @Id
+public class LoginDTO implements Serializable {
     private String username;
     private String password;
     private String fullName;
     private Integer age;
     private String phoneNumber;
     private String identityCardNumber;
-    private String otpSignUp;
+
 }

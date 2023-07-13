@@ -1,6 +1,7 @@
 package com.nhom7.qlkhachsan.interceptor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nhom7.qlkhachsan.dto.LoginDTO;
 import com.nhom7.qlkhachsan.dto.request.RegisterRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -40,7 +41,7 @@ public class EmailFormatInterceptor implements HandlerInterceptor {
                     }
 
                     // Parse thông tin từ request body thành đối tượng LoginDTO
-                    RegisterRequest loginDTO = objectMapper.readValue(requestBody, RegisterRequest.class);
+                    LoginDTO loginDTO = objectMapper.readValue(requestBody, LoginDTO.class);
                     request.setAttribute("loginDTO", loginDTO);
 
                     // Kiểm tra định dạng email
