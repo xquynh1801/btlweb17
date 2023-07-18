@@ -1,5 +1,9 @@
-FROM openjdk:19
+FROM openjdk:8-jdk-alpine
+
+ARG JAR_FILE=target/QLKhachsan-0.0.1-SNAPSHOT.jar
+
+ADD ${JAR_FILE} hotel-management.jar
+
 EXPOSE 8080
-ARG JAR_FILE=target/QLKhachsan-V1.0.jar
-ADD ${JAR_FILE} app.jar
-ENTRYPOINT ["java","-jar","/app.jar"]
+
+ENTRYPOINT ["java","-jar","hotel-management.jar"]
