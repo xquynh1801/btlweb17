@@ -157,6 +157,18 @@
             <artifactId>spring-data-redis</artifactId>
             <version>2.6.4</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-elasticsearch</artifactId>
+        </dependency>
+
+            <dependency>
+                <groupId>org.elasticsearch.client</groupId>
+                <artifactId>elasticsearch-rest-high-level-client</artifactId>
+                <version>7.15.0</version> <!-- Phiên bản Elasticsearch sử dụng -->
+            </dependency>
+
     </dependencies>
 
     <build>
