@@ -1,0 +1,8 @@
+cluster.name: "docker-es-cluster"
+network.host: localhost
+
+# License
+xpack.license.self_generated.type: basic
+
+# Monitoring
+xpack.monitoring.collection.enabled: true
