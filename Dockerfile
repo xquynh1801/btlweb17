@@ -1,6 +1,6 @@
-FROM openjdk:8-jdk-alpine
+FROM openjdk:19
 
-ARG JAR_FILE=target/QLKhachsan-0.0.1-SNAPSHOT.jar
+ARG JAR_FILE=QLKhachsan-V1.0.jar
 
 ADD ${JAR_FILE} hotel-management.jar
 
